@@ -12,6 +12,12 @@ type Frame = {
 
 const FRAMES: Frame[] = [
   {
+    chars: ['H', 'E', 'Y', '!'],
+    line1: 'Just one more to go.',
+    line2: 'Every follow counts.',
+    duration: 800,
+  },
+  {
     chars: ['H', 'E', 'R', 'E'],
     line1: 'Just one more to go.',
     line2: 'Every follow counts.',
@@ -110,19 +116,20 @@ function FlipCard({ value }: { value: string }) {
     setPrevious(old);
     setDisplay(value);
     setPhase('top');
-    const toBottom = window.setTimeout(() => setPhase('bottom'), 165);
-    const toIdle = window.setTimeout(() => setPhase('idle'), 330);
+    const toBottom = window.setTimeout(() => setPhase('bottom'), 200);
+    const toIdle = window.setTimeout(() => setPhase('idle'), 400);
     return () => {
       window.clearTimeout(toBottom);
       window.clearTimeout(toIdle);
     };
   }, [value]);
 
-  const glyph = (char: string) =>
-    char === 'user' ? <UserIcon /> : <span className="flip-glyph">{char}</span>;
+  const glyph = (char: string) => (
+    <span className="flip-glyph">{char === 'user' ? <UserIcon /> : char}</span>
+  );
 
-  const topContent = phase === 'top' ? previous : display;
-  const bottomContent = phase === 'idle' ? display : phase === 'top' ? previous : display;
+  const topContent = display;
+  const bottomContent = phase === 'idle' ? display : previous;
 
   return (
     <div className="flip-card">
@@ -201,7 +208,7 @@ export default function FollowersRiff() {
   }, [index, frame.duration]);
 
   return (
-    <main className="relative flex min-h-[100svh] w-full flex-col items-center justify-center overflow-hidden bg-[#191919] px-6 text-center">
+    <main className="relative flex min-h-[100svh] w-full flex-col items-center justify-center overflow-hidden bg-[radial-gradient(ellipse_at_center,#242424_0%,#191919_72%)] px-6 text-center">
       {frame.confetti && <Confetti key={index} />}
 
       <div className="relative z-10 flex flex-col items-center">

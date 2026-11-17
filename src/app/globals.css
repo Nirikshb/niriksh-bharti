@@ -21,7 +21,7 @@ body {
     0 0 0 1px rgba(255, 255, 255, 0.03),
     inset 0 1px 0 rgba(255, 255, 255, 0.09),
     inset 0 -3px 8px rgba(0, 0, 0, 0.7);
-  perspective: 700px;
+  perspective: 900px;
 }
 
 .flip-half,
@@ -78,16 +78,32 @@ body {
 
 .flip-flap {
   z-index: 5;
+  will-change: transform;
 }
 
 .flip-flap-top {
   transform-origin: bottom center;
-  animation: flip-top 0.22s ease-in forwards;
+  animation: flip-top 0.2s cubic-bezier(0.55, 0, 1, 0.45) forwards;
 }
 
 .flip-flap-bottom {
   transform-origin: top center;
-  animation: flip-bottom 0.22s ease-out forwards;
+  animation: flip-bottom 0.2s cubic-bezier(0, 0, 0.25, 1) forwards;
+}
+
+.flip-flap::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.flip-flap-top::after {
+  background: linear-gradient(to bottom, rgba(0, 0, 0, 0) 35%, rgba(0, 0, 0, 0.42) 100%);
+}
+
+.flip-flap-bottom::after {
+  background: linear-gradient(to bottom, rgba(0, 0, 0, 0.45) 0%, rgba(0, 0, 0, 0) 65%);
 }
 
 @keyframes flip-top {
