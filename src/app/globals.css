@@ -169,3 +169,65 @@ body {
     animation-duration: 0.01ms;
   }
 }
+
+/* ---------- contribution calendar / isometric landscape ---------- */
+.landscape-shadow {
+  position: absolute;
+  left: 12%;
+  right: 12%;
+  bottom: 8%;
+  height: 34px;
+  border-radius: 50%;
+  background: radial-gradient(ellipse at center, rgba(20, 61, 42, 0.22), transparent 70%);
+  filter: blur(9px);
+  transition: opacity 1s ease;
+  pointer-events: none;
+}
+
+.heatmap-scene {
+  --gap: 2px;
+  position: relative;
+  width: 100%;
+  aspect-ratio: 37 / 7;
+  transform-style: preserve-3d;
+  transition: transform 1.15s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.heat-cell {
+  position: absolute;
+  width: calc(100% / 37 - var(--gap));
+  height: calc(100% / 7 - var(--gap));
+  transform-style: preserve-3d;
+}
+
+.heat-top,
+.heat-side {
+  position: absolute;
+  transition:
+    transform 1.15s cubic-bezier(0.2, 0.8, 0.2, 1),
+    height 1.15s cubic-bezier(0.2, 0.8, 0.2, 1),
+    width 1.15s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.heat-top {
+  inset: 0;
+  border-radius: 2px;
+}
+
+.heat-side-front {
+  left: 0;
+  top: 100%;
+  width: 100%;
+  transform-origin: top center;
+  transform: rotateX(90deg);
+  border-radius: 0 0 2px 2px;
+}
+
+.heat-side-right {
+  left: 100%;
+  top: 0;
+  height: 100%;
+  transform-origin: left center;
+  transform: rotateY(-90deg);
+  border-radius: 0 2px 2px 0;
+}

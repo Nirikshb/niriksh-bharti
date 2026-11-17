@@ -1,5 +1,5 @@
-import FollowersRiff from '@/components/FollowersRiff';
+import ActivityRiff from '@/components/ActivityRiff';
 
 export default function Home() {
-  return <FollowersRiff />;
+  return <ActivityRiff />;
 }
