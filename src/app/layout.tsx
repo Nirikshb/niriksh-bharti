@@ -3,8 +3,8 @@ import type { ReactNode } from 'react';
 import './globals.css';
 
 export const metadata: Metadata = {
-  title: 'A year of showing up',
-  description: 'A contribution calendar that becomes an isometric landscape.',
+  title: 'Followers — 1K',
+  description: 'A split-flap follower milestone animation.',
 };
 
 export default function RootLayout({ children }: { children: ReactNode }) {

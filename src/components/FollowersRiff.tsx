@@ -15,13 +15,19 @@ const FRAMES: Frame[] = [
     chars: ['H', 'E', 'R', 'E'],
     line1: 'Just one more to go.',
     line2: 'Every follow counts.',
-    duration: 2400,
+    duration: 2200,
   },
   {
     chars: ['E', 'Y', 'E', 'S'],
     line1: 'Just one more to go.',
     line2: 'Every follow counts.',
-    duration: 1700,
+    duration: 1300,
+  },
+  {
+    chars: ['L', 'I', 'K', 'E'],
+    line1: 'Just one more to go.',
+    line2: 'Every follow counts.',
+    duration: 900,
   },
   {
     chars: ['H', 'E', 'R', 'E'],
@@ -104,8 +110,8 @@ function FlipCard({ value }: { value: string }) {
     setPrevious(old);
     setDisplay(value);
     setPhase('top');
-    const toBottom = window.setTimeout(() => setPhase('bottom'), 230);
-    const toIdle = window.setTimeout(() => setPhase('idle'), 460);
+    const toBottom = window.setTimeout(() => setPhase('bottom'), 165);
+    const toIdle = window.setTimeout(() => setPhase('idle'), 330);
     return () => {
       window.clearTimeout(toBottom);
       window.clearTimeout(toIdle);
