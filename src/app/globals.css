@@ -4,5 +4,168 @@
 
 html,
 body {
-  @apply bg-white text-black antialiased;
+  @apply bg-[#191919] text-white antialiased;
+}
+
+/* ---------- split-flap cards ---------- */
+.flip-card {
+  --card-h: clamp(108px, 28.5vw, 184px);
+  position: relative;
+  width: clamp(72px, 19vw, 124px);
+  height: var(--card-h);
+  border-radius: 16px;
+  background: linear-gradient(180deg, #28282b 0%, #1d1d1f 100%);
+  border: 2px solid #0b0b0c;
+  box-shadow:
+    0 18px 32px -10px rgba(0, 0, 0, 0.8),
+    inset 0 1px 0 rgba(255, 255, 255, 0.06),
+    inset 0 -3px 8px rgba(0, 0, 0, 0.55);
+  perspective: 700px;
+}
+
+.flip-half,
+.flip-flap {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 50%;
+  overflow: hidden;
+  background: linear-gradient(180deg, #2b2b2e, #202023);
+  backface-visibility: hidden;
+}
+
+.flip-half-top,
+.flip-flap-top {
+  top: 0;
+  border-radius: 14px 14px 0 0;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+
+.flip-half-bottom,
+.flip-flap-bottom {
+  bottom: 0;
+  border-radius: 0 0 14px 14px;
+  background: linear-gradient(180deg, #222225, #1b1b1d);
+  box-shadow: inset 0 -1px 0 rgba(0, 0, 0, 0.5);
+}
+
+.flip-glyph {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: var(--card-h);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: ui-sans-serif, system-ui, "Helvetica Neue", Arial, sans-serif;
+  font-size: clamp(52px, 13.5vw, 90px);
+  font-weight: 700;
+  line-height: 1;
+  color: #d2d2d5;
+  text-shadow: 0 2px 3px rgba(0, 0, 0, 0.45);
+}
+
+.flip-half-top .flip-glyph,
+.flip-flap-top .flip-glyph {
+  top: 0;
+}
+
+.flip-half-bottom .flip-glyph,
+.flip-flap-bottom .flip-glyph {
+  bottom: 0;
+}
+
+.flip-flap {
+  z-index: 5;
+}
+
+.flip-flap-top {
+  transform-origin: bottom center;
+  animation: flip-top 0.22s ease-in forwards;
+}
+
+.flip-flap-bottom {
+  transform-origin: top center;
+  animation: flip-bottom 0.22s ease-out forwards;
+}
+
+@keyframes flip-top {
+  from {
+    transform: rotateX(0deg);
+  }
+  to {
+    transform: rotateX(-90deg);
+  }
+}
+
+@keyframes flip-bottom {
+  from {
+    transform: rotateX(90deg);
+  }
+  to {
+    transform: rotateX(0deg);
+  }
+}
+
+.flip-seam {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 50%;
+  height: 2px;
+  margin-top: -1px;
+  background: #09090a;
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.05),
+    0 -1px 0 rgba(0, 0, 0, 0.65);
+  z-index: 6;
+}
+
+.flip-peg {
+  position: absolute;
+  top: 50%;
+  width: 5px;
+  height: 14px;
+  margin-top: -7px;
+  border-radius: 2px;
+  background: linear-gradient(90deg, #cfcfd2, #f4f4f6);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.85);
+  z-index: 7;
+}
+
+.flip-peg-left {
+  left: -6px;
+}
+
+.flip-peg-right {
+  right: -6px;
+}
+
+/* ---------- celebration confetti ---------- */
+.confetti-piece {
+  animation-name: confetti-fall;
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+}
+
+@keyframes confetti-fall {
+  0% {
+    transform: translate3d(0, 0, 0) rotate(0deg);
+    opacity: 0;
+  }
+  5% {
+    opacity: 1;
+  }
+  100% {
+    transform: translate3d(var(--dx), 115vh, 0) rotate(var(--rot));
+    opacity: 0.9;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .flip-flap-top,
+  .flip-flap-bottom,
+  .confetti-piece {
+    animation-duration: 0.01ms;
+  }
 }

@@ -3,8 +3,8 @@ import type { ReactNode } from 'react';
 import './globals.css';
 
 export const metadata: Metadata = {
-  title: 'Flower Confetti',
-  description: 'A flower confetti burst interaction.',
+  title: 'Followers — 1K',
+  description: 'A split-flap follower milestone animation.',
 };
 
 export default function RootLayout({ children }: { children: ReactNode }) {
