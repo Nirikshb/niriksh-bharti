@@ -2,48 +2,29 @@
 
 import { useCallback, useEffect, useRef } from 'react';
 
-type Phase = 'idle' | 'hold' | 'fall';
+/** Per-flower state. A flower falls as soon as it is shot out and never comes back up. */
+type FlowerState = 'falling' | 'settled';
 
-type Particle = {
-  active: boolean;
+type Flower = {
+  el: HTMLSpanElement;
+  state: FlowerState;
   x: number;
   y: number;
   vx: number;
   vy: number;
-  tx: number;
-  ty: number;
   rot: number;
   vrot: number;
   size: number;
-  emoji: string;
   opacity: number;
-  settledFor: number; // -1 = still moving, >=0 = seconds since hitting the floor
+  settledFor: number;
 };
 
-const MAX_PARTICLES = 48;
 const FLOWERS = ['🌸', '🌼', '🌷', '🌺', '🌹', '🌻', '🏵️', '🌸', '🌼'];
 const GRAVITY = 1500;
-const SPAWN_INTERVAL = 0.075;
+const SPAWN_INTERVAL = 0.07;
+const HARD_CAP = 500; // safety valve only; normal sessions never reach it
 
 const pick = <T,>(list: readonly T[]): T => list[Math.floor(Math.random() * list.length)];
-
-function makeParticle(): Particle {
-  return {
-    active: false,
-    x: 0,
-    y: 0,
-    vx: 0,
-    vy: 0,
-    tx: 0,
-    ty: 0,
-    rot: 0,
-    vrot: 0,
-    size: 18,
-    emoji: '🌸',
-    opacity: 0,
-    settledFor: -1,
-  };
-}
 
 function Tulip({
   x,
@@ -109,56 +90,58 @@ function Bouquet() {
 }
 
 export default function FlowerBurst() {
-  const particles = useRef<Particle[]>(Array.from({ length: MAX_PARTICLES }, makeParticle));
-  const elements = useRef<(HTMLSpanElement | null)[]>([]);
-  const phase = useRef<Phase>('idle');
+  const layerRef = useRef<HTMLDivElement>(null);
+  const flowers = useRef<Flower[]>([]);
+  const holding = useRef(false);
   const autoDemo = useRef(true);
   const autoTimers = useRef<number[]>([]);
 
   const spawn = useCallback(() => {
-    const pool = particles.current;
-    const index = pool.findIndex((p) => !p.active);
-    if (index === -1) return;
+    const layer = layerRef.current;
+    if (!layer || flowers.current.length >= HARD_CAP) return;
 
-    const p = pool[index];
     const w = window.innerWidth;
     const h = window.innerHeight;
+    const size = Math.round(14 + Math.random() * 16);
 
-    p.active = true;
-    p.x = w / 2 + (Math.random() - 0.5) * 70;
-    p.y = h / 2 + (Math.random() - 0.5) * 70;
-    p.tx = 30 + Math.random() * Math.max(1, w - 60);
-    p.ty = 36 + Math.random() * Math.min(h * 0.26, 210);
-    p.vx = 0;
-    p.vy = 0;
-    p.rot = (Math.random() - 0.5) * 50;
-    p.vrot = 0;
-    p.size = Math.round(14 + Math.random() * 16);
-    p.emoji = pick(FLOWERS);
-    p.opacity = 0;
-    p.settledFor = -1;
+    const el = document.createElement('span');
+    el.textContent = pick(FLOWERS);
+    el.className = 'absolute left-0 top-0 select-none will-change-transform';
+    el.style.fontSize = `${size}px`;
+    el.style.opacity = '0';
+    el.style.filter = 'drop-shadow(0 2px 2px rgba(0,0,0,0.12))';
+    layer.appendChild(el);
 
-    const el = elements.current[index];
-    if (el) {
-      el.textContent = p.emoji;
-      el.style.fontSize = `${p.size}px`;
-    }
+    flowers.current.push({
+      el,
+      state: 'falling',
+      x: w / 2 + (Math.random() - 0.5) * 70,
+      y: h / 2 + (Math.random() - 0.5) * 70,
+      vx: (Math.random() - 0.5) * 900,
+      vy: -320 - Math.random() * 380,
+      rot: (Math.random() - 0.5) * 50,
+      vrot: (Math.random() - 0.5) * 700,
+      size,
+      opacity: 0,
+      settledFor: -1,
+    });
   }, []);
 
   const startHold = useCallback(() => {
-    phase.current = 'hold';
+    holding.current = true;
   }, []);
 
   const release = useCallback(() => {
-    if (phase.current !== 'hold') return;
-    phase.current = 'fall';
-    for (const p of particles.current) {
-      if (!p.active) continue;
-      // Scatter outward and pop up slightly, then gravity takes over.
-      p.vx = (Math.random() - 0.5) * 1000;
-      p.vy = -140 - Math.random() * 320;
-      p.vrot = (Math.random() - 0.5) * 900;
-      p.settledFor = -1;
+    if (!holding.current) return;
+    holding.current = false;
+
+    // Stop shooting. Flowers still in the air get one final scatter; anything
+    // already on the ground stays down and keeps fading.
+    for (const flower of flowers.current) {
+      if (flower.state !== 'falling') continue;
+      flower.vx += (Math.random() - 0.5) * 600;
+      flower.vy = -100 - Math.random() * 220;
+      flower.vrot += (Math.random() - 0.5) * 500;
     }
   }, []);
 
@@ -168,7 +151,7 @@ export default function FlowerBurst() {
     autoTimers.current = [];
   }, []);
 
-  // Physics loop — writes transforms directly to the DOM, zero React re-renders.
+  // Physics loop — transforms are written straight to the DOM (no re-renders).
   useEffect(() => {
     let frame = 0;
     let last = performance.now();
@@ -178,9 +161,9 @@ export default function FlowerBurst() {
       const dt = Math.min((now - last) / 1000, 0.05);
       last = now;
       const viewportHeight = window.innerHeight;
-      const currentPhase = phase.current;
 
-      if (currentPhase === 'hold') {
+      // Keep shooting for as long as the pointer is held down / hovering.
+      if (holding.current) {
         spawnAccumulator += dt;
         while (spawnAccumulator >= SPAWN_INTERVAL) {
           spawnAccumulator -= SPAWN_INTERVAL;
@@ -190,54 +173,45 @@ export default function FlowerBurst() {
         spawnAccumulator = 0;
       }
 
-      particles.current.forEach((p, i) => {
-        if (!p.active) return;
-        const el = elements.current[i];
-        if (!el) return;
+      for (let i = flowers.current.length - 1; i >= 0; i--) {
+        const f = flowers.current[i];
 
-        if (currentPhase === 'hold') {
-          // Rise toward a spot in the top band and hover there.
-          p.x += (p.tx - p.x) * Math.min(1, dt * 3.4);
-          p.y += (p.ty - p.y) * Math.min(1, dt * 2.8);
-          p.y += Math.sin(now * 0.002 + i) * 0.4;
-          p.rot += Math.sin(now * 0.0015 + i) * 0.06;
-          p.opacity += (1 - p.opacity) * Math.min(1, dt * 9);
-        } else {
-          // Release: ballistic fall, air drag, bounce, settle, fade.
-          p.vy += GRAVITY * dt;
-          p.vx *= 1 - 0.55 * dt;
-          p.x += p.vx * dt;
-          p.y += p.vy * dt;
-          p.rot += p.vrot * dt;
+        if (f.state === 'falling') {
+          f.opacity += (1 - f.opacity) * Math.min(1, dt * 9);
+          f.vy += GRAVITY * dt;
+          f.vx *= 1 - 0.55 * dt;
+          f.x += f.vx * dt;
+          f.y += f.vy * dt;
+          f.rot += f.vrot * dt;
 
-          const floor = viewportHeight - 18 - p.size / 2;
-          if (p.y >= floor) {
-            p.y = floor;
-            p.vy = -p.vy * 0.36;
-            p.vx *= 0.62;
-            p.vrot *= 0.5;
-            if (Math.abs(p.vy) < 60) {
-              p.vy = 0;
-              p.vx = 0;
-              p.vrot = 0;
-              if (p.settledFor < 0) p.settledFor = 0;
+          const floor = viewportHeight - 18 - f.size / 2;
+          if (f.y >= floor) {
+            f.y = floor;
+            f.vy = -f.vy * 0.36;
+            f.vx *= 0.62;
+            f.vrot *= 0.5;
+            if (Math.abs(f.vy) < 60) {
+              f.vy = 0;
+              f.vx = 0;
+              f.vrot = 0;
+              f.settledFor = 0;
+              f.state = 'settled';
             }
           }
-          if (p.settledFor >= 0) {
-            p.settledFor += dt;
-            if (p.settledFor > 1.1) p.opacity -= dt * 1.5;
-          }
-          if (p.opacity <= 0) {
-            p.active = false;
-            p.opacity = 0;
-            el.style.opacity = '0';
-            return;
+        } else {
+          // settled: linger briefly, then vanish for good
+          f.settledFor += dt;
+          if (f.settledFor > 1.1) f.opacity -= dt * 1.5;
+          if (f.opacity <= 0) {
+            f.el.remove();
+            flowers.current.splice(i, 1);
+            continue;
           }
         }
 
-        el.style.transform = `translate3d(${p.x}px, ${p.y}px, 0) translate(-50%, -50%) rotate(${p.rot}deg)`;
-        el.style.opacity = String(p.opacity);
-      });
+        f.el.style.transform = `translate3d(${f.x}px, ${f.y}px, 0) translate(-50%, -50%) rotate(${f.rot}deg)`;
+        f.el.style.opacity = String(f.opacity);
+      }
 
       frame = requestAnimationFrame(tick);
     };
@@ -246,10 +220,9 @@ export default function FlowerBurst() {
     return () => cancelAnimationFrame(frame);
   }, [spawn]);
 
-  // Hands-off demo so the page shows the effect without interaction.
+  // Hands-free demo until the first real interaction.
   useEffect(() => {
-    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    if (reduce) return;
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
 
     const cycle = () => {
       if (!autoDemo.current) return;
@@ -272,24 +245,11 @@ export default function FlowerBurst() {
         className="pointer-events-none absolute left-1/2 top-1/2 aspect-[4/5] w-[min(60vw,620px)] -translate-x-1/2 -translate-y-1/2 rounded-[90px] bg-black/[0.018]"
       />
 
-      <div aria-hidden="true" className="pointer-events-none absolute inset-0 z-10 overflow-hidden">
-        {Array.from({ length: MAX_PARTICLES }, (_, i) => (
-          <span
-            key={i}
-            ref={(element) => {
-              elements.current[i] = element;
-            }}
-            className="absolute left-0 top-0 select-none opacity-0 will-change-transform"
-            style={{ filter: 'drop-shadow(0 2px 2px rgba(0,0,0,0.12))' }}
-          >
-            🌸
-          </span>
-        ))}
-      </div>
+      <div ref={layerRef} aria-hidden="true" className="pointer-events-none absolute inset-0 z-10 overflow-hidden" />
 
       <button
         type="button"
-        aria-label="Hold to gather flowers, release to drop them"
+        aria-label="Hold to shoot out flowers, release to drop them"
         onPointerEnter={(event) => {
           if (event.pointerType === 'mouse') {
             stopAuto();
@@ -316,7 +276,7 @@ export default function FlowerBurst() {
           startHold();
         }}
         onBlur={release}
-        className="group relative z-20 flex aspect-square w-[clamp(190px,44vw,270px)] items-center justify-center rounded-[30%] bg-gradient-to-br from-white to-[#f3f3f3] shadow-[0_30px_60px_-15px_rgba(0,0,0,0.20),0_16px_28px_-18px_rgba(0,0,0,0.14),inset_0_1px_2px_rgba(255,255,255,0.9)] outline-none transition-transform duration-500 ease-out hover:scale-[1.04] active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-neutral-400"
+        className="group relative z-20 flex aspect-square w-[clamp(190px,44vw,270px)] items-center justify-center rounded-[30%] bg-gradient-to-br from-white to-[#f3f3f3] shadow-[0_30px_60px_-15px_rgba(0,0,0,0.20),0_16px_28px_-18px_rgba(0,0,0,0.14),inset_0_1px_2px_rgba(255,255,255,0.9)] outline-none transition-transform duration-500 ease-out hover:scale-[1.04] active:scale-[0.98]"
       >
         <span className="transition-transform duration-500 ease-out group-hover:scale-110 group-hover:-rotate-6">
           <Bouquet />
