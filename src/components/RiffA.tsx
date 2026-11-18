@@ -1,23 +1,49 @@
 'use client';
 
-import { useCallback, useState } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 
 type IconId = 'chat' | 'cube' | 'send';
 
-const ORDER: { id: IconId; label: string }[] = [
-  { id: 'chat', label: 'Chat' },
-  { id: 'cube', label: 'Files' },
-  { id: 'send', label: 'Send' },
-];
+const ORDER: IconId[] = ['chat', 'cube', 'send'];
 
 export default function RiffA({ className = '' }: { className?: string }) {
-  const [active, setActive] = useState<IconId>('send');
-  const [nonce, setNonce] = useState(0);
+  const [selected, setSelected] = useState(0);
+  const [gooKey, setGooKey] = useState(0);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const buttonsRef = useRef<(HTMLButtonElement | null)[]>([]);
+  const [thumb, setThumb] = useState({ left: 0, width: 0 });
 
-  const handleClick = useCallback((id: IconId) => {
-    setActive(id);
-    setNonce((value) => value + 1);
+  // Measure the currently selected button and park the glass thumb over it.
+  const measure = () => {
+    const button = buttonsRef.current[selected];
+    const container = containerRef.current;
+    if (!button || !container) return;
+    setThumb({ left: button.offsetLeft, width: button.offsetWidth });
+  };
+
+  useLayoutEffect(measure, [selected]);
+
+  useEffect(() => {
+    const onResize = () => measure();
+    window.addEventListener('resize', onResize);
+    return () => window.removeEventListener('resize', onResize);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selected]);
+
+  // Auto-advance through the icons, like the riff does (loop).
+  useEffect(() => {
+    const timer = window.setInterval(() => {
+      setGooKey((key) => key + 1);
+      setSelected((value) => (value + 1) % ORDER.length);
+    }, 2800);
+    return () => window.clearInterval(timer);
   }, []);
+
+  const handleClick = (index: number) => {
+    if (index === selected) return;
+    setGooKey((key) => key + 1);
+    setSelected(index);
+  };
 
   const renderIcon = (id: IconId) => {
     switch (id) {
@@ -53,34 +79,43 @@ export default function RiffA({ className = '' }: { className?: string }) {
         style={{ background: 'radial-gradient(ellipse at center, rgba(255,255,255,0.05) 0%, transparent 65%)' }}
       />
 
-      <div className="absolute bottom-10 left-1/2 -translate-x-1/2 text-center text-[10px] font-semibold uppercase tracking-[0.25em] text-white/25">
-        RiffA
-      </div>
-
       <div
+        ref={containerRef}
         role="toolbar"
         aria-label="Quick actions"
-        className="relative flex items-center rounded-full border border-white bg-white px-[clamp(0.9rem,6vmin,1.9rem)] py-[clamp(0.7rem,4.5vmin,1.1rem)] shadow-[0_16px_45px_-15px_rgba(255,255,255,0.22)]"
+        className="relative flex w-[min(46rem,92vw)] items-center rounded-full border border-[#ececf0] bg-[#fbfbfc] p-[clamp(0.32rem,1.6vmin,0.55rem)] shadow-[0_18px_55px_-18px_rgba(255,255,255,0.25)]"
       >
-        {ORDER.map(({ id, label }) => {
-          const isActive = active === id;
+        {/* liquid gooey selector */}
+        <span
+          aria-hidden="true"
+          key={gooKey}
+          className="riffA-thumb pointer-events-none absolute top-1/2 h-[clamp(2.5rem,11.5vmin,3.65rem)] rounded-full bg-white"
+          style={{
+            left: thumb.left,
+            width: thumb.width,
+            transition: 'left 0.9s cubic-bezier(0.65, 0, 0.35, 1), width 0.9s cubic-bezier(0.65, 0, 0.35, 1)',
+            boxShadow:
+              '0 10px 24px -10px rgba(25,25,35,0.45), 0 2px 6px rgba(25,25,35,0.18), inset 0 1px 0 rgba(255,255,255,0.9)',
+          }}
+        />
+
+        {ORDER.map((id, index) => {
+          const isSelected = index === selected;
           return (
             <button
               key={id}
+              ref={(element) => {
+                buttonsRef.current[index] = element;
+              }}
               type="button"
-              aria-label={label}
-              aria-pressed={isActive}
-              onClick={() => handleClick(id)}
-              className={`grid h-[clamp(2.6rem,13vmin,3.6rem)] w-[clamp(2.6rem,13vmin,3.6rem)] place-items-center rounded-full outline-none ring-0 transition-all duration-300 focus-visible:ring-2 focus-visible:ring-neutral-400 ${
-                isActive ? 'scale-110 bg-[#101014] text-white' : 'bg-transparent text-[#101014] hover:scale-105'
+              aria-label={id}
+              aria-pressed={isSelected}
+              onClick={() => handleClick(index)}
+              className={`relative z-10 grid h-[clamp(2.5rem,11.5vmin,3.65rem)] flex-1 place-items-center rounded-full outline-none focus-visible:ring-2 focus-visible:ring-neutral-400 transition-all duration-500 ${
+                isSelected ? 'text-[#101014]' : 'text-[#8f8f99]'
               }`}
             >
-              <span
-                key={isActive ? `${id}-${nonce}` : `${id}-idle`}
-                className={`block h-[clamp(1.3rem,6vmin,1.7rem)] w-[clamp(1.3rem,6vmin,1.7rem)] ${
-                  isActive ? 'riffA-pop' : ''
-                }`}
-              >
+              <span className="block h-[clamp(1.3rem,5.5vmin,1.75rem)] w-[clamp(1.3rem,5.5vmin,1.75rem)]">
                 {renderIcon(id)}
               </span>
             </button>

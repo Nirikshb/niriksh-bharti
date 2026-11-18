@@ -188,64 +188,25 @@ body {
 }
 
 /* ---------- riff A (hardik gondhiya) ---------- */
-@keyframes riffA-orb {
-  0%,
-  100% {
-    transform: scale(0.82);
-    opacity: 0.85;
-  }
-  50% {
-    transform: scale(1.03);
-    opacity: 1;
-  }
-}
-
-@keyframes riffA-core {
-  0%,
-  100% {
-    transform: scale(0.86);
-  }
-  50% {
-    transform: scale(1.02);
-  }
-}
-
-@keyframes riffA-ring {
+@keyframes riffA-thumb {
   0% {
-    transform: scale(0.55);
-    opacity: 0;
+    transform: translateY(-50%) scale(1, 1);
   }
-  20% {
-    opacity: 0.5;
+  30% {
+    transform: translateY(-50%) scale(1.42, 0.68);
+  }
+  62% {
+    transform: translateY(-50%) scale(0.94, 1.12);
   }
   100% {
-    transform: scale(1.9);
-    opacity: 0;
+    transform: translateY(-50%) scale(1, 1);
   }
 }
 
-@keyframes riffA-pop {
-  0% {
-    transform: scale(0.72);
-  }
-  35% {
-    transform: scale(1.22);
-  }
-  70% {
-    transform: scale(0.96);
-  }
-  100% {
-    transform: scale(1);
-  }
-}
-
-@keyframes riffA-dots {
-  from {
-    background-position: 0 0;
-  }
-  to {
-    background-position: 26px 26px;
-  }
+.riffA-thumb {
+  border-radius: 9999px;
+  animation: riffA-thumb 0.9s cubic-bezier(0.65, 0, 0.35, 1) both;
+  will-change: transform;
 }
 
 /* ---------- contribution calendar / isometric landscape ---------- */
