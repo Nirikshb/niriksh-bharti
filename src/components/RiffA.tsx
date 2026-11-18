@@ -8,7 +8,7 @@ const ORDER: IconId[] = ['chat', 'cube', 'send'];
 
 export default function RiffA({ className = '' }: { className?: string }) {
   const [selected, setSelected] = useState(0);
-  const [gooKey, setGooKey] = useState(0);
+  const [traveling, setTraveling] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
   const buttonsRef = useRef<(HTMLButtonElement | null)[]>([]);
   const [thumb, setThumb] = useState({ left: 0, width: 0 });
@@ -33,15 +33,20 @@ export default function RiffA({ className = '' }: { className?: string }) {
   // Auto-advance through the icons, like the riff does (loop).
   useEffect(() => {
     const timer = window.setInterval(() => {
-      setGooKey((key) => key + 1);
       setSelected((value) => (value + 1) % ORDER.length);
     }, 2800);
     return () => window.clearInterval(timer);
   }, []);
 
+  // Zoom/stretch the thumb while it travels, like liquid goo.
+  useEffect(() => {
+    setTraveling(true);
+    const timer = window.setTimeout(() => setTraveling(false), 750);
+    return () => window.clearTimeout(timer);
+  }, [selected]);
+
   const handleClick = (index: number) => {
     if (index === selected) return;
-    setGooKey((key) => key + 1);
     setSelected(index);
   };
 
@@ -71,25 +76,26 @@ export default function RiffA({ className = '' }: { className?: string }) {
 
   return (
     <section
-      className={`relative flex min-h-[100svh] w-full items-center justify-center overflow-hidden bg-[#0b0b10] ${className}`}
+      className={`relative flex min-h-[100svh] w-full items-center justify-center overflow-hidden bg-[#f7f7f8] ${className}`}
     >
       <div
         aria-hidden="true"
         className="pointer-events-none absolute inset-0"
-        style={{ background: 'radial-gradient(ellipse at center, rgba(255,255,255,0.05) 0%, transparent 65%)' }}
+        style={{ background: 'radial-gradient(ellipse at center, rgba(0,0,0,0.02) 0%, transparent 70%)' }}
       />
 
       <div
         ref={containerRef}
         role="toolbar"
         aria-label="Quick actions"
-        className="relative flex w-[min(46rem,92vw)] items-center rounded-full border border-[#ececf0] bg-[#fbfbfc] p-[clamp(0.32rem,1.6vmin,0.55rem)] shadow-[0_18px_55px_-18px_rgba(255,255,255,0.25)]"
+        className="relative flex w-[min(46rem,92vw)] items-center rounded-full border border-[#ececef] bg-white p-[clamp(0.32rem,1.6vmin,0.55rem)] shadow-[0_18px_55px_-18px_rgba(15,15,25,0.22),0_2px_10px_rgba(15,15,25,0.06)]"
       >
-        {/* liquid gooey selector */}
+        {/* liquid gooey selector — no remount, so it can actually glide */}
         <span
           aria-hidden="true"
-          key={gooKey}
-          className="riffA-thumb pointer-events-none absolute top-1/2 h-[clamp(2.5rem,11.5vmin,3.65rem)] rounded-full"
+          className={`riffA-thumb pointer-events-none h-[clamp(2.5rem,11.5vmin,3.65rem)] rounded-full ${
+            traveling ? 'squish' : ''
+          }`}
           style={{
             left: thumb.left,
             width: thumb.width,
@@ -112,7 +118,11 @@ export default function RiffA({ className = '' }: { className?: string }) {
                 isSelected ? 'text-[#101014] opacity-100' : 'text-[#101014] opacity-30'
               }`}
             >
-              <span className="block h-[clamp(1.3rem,5.5vmin,1.75rem)] w-[clamp(1.3rem,5.5vmin,1.75rem)]">
+              <span
+                className={`block h-[clamp(1.3rem,5.5vmin,1.75rem)] w-[clamp(1.3rem,5.5vmin,1.75rem)] transition-transform duration-500 ${
+                  isSelected ? 'scale-[1.22]' : 'scale-100'
+                }`}
+              >
                 {renderIcon(id)}
               </span>
             </button>

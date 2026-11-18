@@ -188,15 +188,15 @@ body {
 }
 
 /* ---------- riff A (hardik gondhiya) ---------- */
-@keyframes riffA-thumb {
+@keyframes riffA-thumb-stretch {
   0% {
     transform: translateY(-50%) scale(1, 1);
   }
   30% {
-    transform: translateY(-50%) scale(1.22, 0.78);
+    transform: translateY(-50%) scale(1.6, 0.7);
   }
-  62% {
-    transform: translateY(-50%) scale(0.92, 1.07);
+  64% {
+    transform: translateY(-50%) scale(1.15, 0.88);
   }
   100% {
     transform: translateY(-50%) scale(1, 1);
@@ -204,17 +204,24 @@ body {
 }
 
 .riffA-thumb {
+  position: absolute;
+  top: 50%;
   border-radius: 9999px;
-  animation: riffA-thumb 0.55s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+  background: rgba(255, 255, 255, 0.97);
+  transform: translateY(-50%) scale(1, 1);
   transition:
-    left 0.55s cubic-bezier(0.34, 1.56, 0.64, 1),
-    width 0.55s cubic-bezier(0.34, 1.56, 0.64, 1);
+    left 0.75s cubic-bezier(0.25, 1.4, 0.4, 1),
+    width 0.75s cubic-bezier(0.25, 1.4, 0.4, 1),
+    transform 0.75s cubic-bezier(0.25, 1.4, 0.4, 1);
   will-change: left, width, transform;
-  background: rgba(255, 255, 255, 0.96);
   box-shadow:
-    0 12px 30px -10px rgba(20, 20, 30, 0.42),
-    0 2px 6px rgba(20, 20, 30, 0.14),
+    0 12px 28px -8px rgba(15, 15, 25, 0.4),
+    0 2px 6px rgba(15, 15, 25, 0.14),
     inset 0 1px 0 rgba(255, 255, 255, 0.9);
+}
+
+.riffA-thumb.squish {
+  animation: riffA-thumb-stretch 0.75s cubic-bezier(0.25, 1.4, 0.4, 1) both;
 }
 
 /* ---------- contribution calendar / isometric landscape ---------- */
