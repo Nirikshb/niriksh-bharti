@@ -89,13 +89,10 @@ export default function RiffA({ className = '' }: { className?: string }) {
         <span
           aria-hidden="true"
           key={gooKey}
-          className="riffA-thumb pointer-events-none absolute top-1/2 h-[clamp(2.5rem,11.5vmin,3.65rem)] rounded-full bg-white"
+          className="riffA-thumb pointer-events-none absolute top-1/2 h-[clamp(2.5rem,11.5vmin,3.65rem)] rounded-full"
           style={{
             left: thumb.left,
             width: thumb.width,
-            transition: 'left 0.9s cubic-bezier(0.65, 0, 0.35, 1), width 0.9s cubic-bezier(0.65, 0, 0.35, 1)',
-            boxShadow:
-              '0 10px 24px -10px rgba(25,25,35,0.45), 0 2px 6px rgba(25,25,35,0.18), inset 0 1px 0 rgba(255,255,255,0.9)',
           }}
         />
 
@@ -111,8 +108,8 @@ export default function RiffA({ className = '' }: { className?: string }) {
               aria-label={id}
               aria-pressed={isSelected}
               onClick={() => handleClick(index)}
-              className={`relative z-10 grid h-[clamp(2.5rem,11.5vmin,3.65rem)] flex-1 place-items-center rounded-full outline-none focus-visible:ring-2 focus-visible:ring-neutral-400 transition-all duration-500 ${
-                isSelected ? 'text-[#101014]' : 'text-[#8f8f99]'
+              className={`relative z-10 grid h-[clamp(2.5rem,11.5vmin,3.65rem)] flex-1 place-items-center rounded-full outline-none ring-0 focus-visible:ring-2 focus-visible:ring-neutral-400 transition-all duration-500 ${
+                isSelected ? 'text-[#101014] opacity-100' : 'text-[#101014] opacity-30'
               }`}
             >
               <span className="block h-[clamp(1.3rem,5.5vmin,1.75rem)] w-[clamp(1.3rem,5.5vmin,1.75rem)]">
