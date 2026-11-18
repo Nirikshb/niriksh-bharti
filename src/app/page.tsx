@@ -1,5 +1,11 @@
-import FollowersRiff from '@/components/FollowersRiff';
+import ActivityRiff from '@/components/ActivityRiff';
+import RiffA from '@/components/RiffA';
 
 export default function Home() {
-  return <FollowersRiff />;
+  return (
+    <main className="flex w-full flex-col">
+      <RiffA />
+      <ActivityRiff />
+    </main>
+  );
 }

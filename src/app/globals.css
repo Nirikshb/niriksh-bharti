@@ -187,6 +187,52 @@ body {
   }
 }
 
+/* ---------- riff A (hardik gondhiya) ---------- */
+@keyframes riffA-orb {
+  0%,
+  100% {
+    transform: scale(0.82);
+    opacity: 0.85;
+  }
+  50% {
+    transform: scale(1.03);
+    opacity: 1;
+  }
+}
+
+@keyframes riffA-core {
+  0%,
+  100% {
+    transform: scale(0.86);
+  }
+  50% {
+    transform: scale(1.02);
+  }
+}
+
+@keyframes riffA-ring {
+  0% {
+    transform: scale(0.55);
+    opacity: 0;
+  }
+  20% {
+    opacity: 0.5;
+  }
+  100% {
+    transform: scale(1.9);
+    opacity: 0;
+  }
+}
+
+@keyframes riffA-dots {
+  from {
+    background-position: 0 0;
+  }
+  to {
+    background-position: 26px 26px;
+  }
+}
+
 /* ---------- contribution calendar / isometric landscape ---------- */
 .landscape-shadow {
   position: absolute;

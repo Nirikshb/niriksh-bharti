@@ -33,7 +33,7 @@ export default function ActivityRiff() {
   const activity = useMemo(makeActivity, []);
 
   return (
-    <main className="flex min-h-[100svh] w-full items-center justify-center bg-[#f2f7f1] px-5 py-12 sm:px-8">
+    <section className="flex min-h-[100svh] w-full items-center justify-center bg-[#f2f7f1] px-5 py-12 sm:px-8">
       <div className="w-full max-w-[460px]">
         <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[#7d9482]">
           Activity / 2026
@@ -140,6 +140,6 @@ export default function ActivityRiff() {
           </button>
         </div>
       </div>
-    </main>
+    </section>
   );
 }
